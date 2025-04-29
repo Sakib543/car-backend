@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const carController = require('../Controllers/Carcontroller');
-const upload = require('../utils/cloudinary'); // middleware
+const upload = require('../Utils/cloudinary'); // middleware
 
 router.post('/', upload.single('carImage'), carController.createCar);
 router.get('/', carController.getAllCars);
