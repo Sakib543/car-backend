@@ -25,7 +25,6 @@ app.use(express.json());
 
 // Routes
 app.use('/api/cars', require('./Routes/Carroutes'));
-app.use
 
 const PORT = process.env.PORT || 5000;
 
