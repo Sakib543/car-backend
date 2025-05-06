@@ -1,6 +1,9 @@
 const Booking = require('../Models/Bookingmodel');
 const Car = require('../Models/Carmodel');
 const mongoose = require('mongoose');
+const BookingLog = require('../Models/BookingLog');
+mongoose.set('strictPopulate', false);
+
 
 exports.createBooking = async (req, res) => {
   try {
@@ -27,15 +30,27 @@ exports.createBooking = async (req, res) => {
     });
 
     await booking.save();
+
+// After creating booking
+await new BookingLog({
+  bookingId: booking._id,
+  action: 'Created',
+  status: booking.status
+}).save();
+
     res.status(201).json(booking);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
+
+
 exports.getAllBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find().populate('carId');
+    const bookings = await Booking.find()
+      .sort({ createdAt: -1 });
+
     res.json(bookings);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -60,11 +75,17 @@ exports.updateBookingStatus = async (req, res) => {
       { status },
       { new: true }
     );
+    await new BookingLog({
+      bookingId: booking._id,
+      action: 'Status Updated',
+      status
+    }).save();
     if (!booking) return res.status(404).json({ error: 'Booking not found' });
     res.json(booking);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+
 };
 
 exports.deleteBooking = async (req, res) => {
@@ -76,3 +97,18 @@ exports.deleteBooking = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+exports.getBookingsByCustomer = async (req, res) => {
+  try {
+    const { phone } = req.query;
+
+    if (!phone) {
+      return res.status(400).json({ error: 'Phone number is required' });
+    }
+
+    const bookings = await Booking.find({ customerPhone: phone }).populate('carId');
+    res.json(bookings);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
