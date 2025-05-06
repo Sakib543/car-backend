@@ -28,7 +28,8 @@ app.use(express.json());
 // Routes
 app.use('/api/cars', require('./Routes/Carroutes'));
 app.use('/api/bookings', require('./Routes/Bookingroutes'));
-app.use('/api/booking-logs', require('./routes/bookingLogRoutes'));
+app.use('/api/booking-logs', require('./Routes/BookingLogroutes'));
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT , () => {
