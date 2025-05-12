@@ -2,9 +2,11 @@ const Booking = require('../Models/Bookingmodel');
 const Car = require('../Models/Carmodel');
 const mongoose = require('mongoose');
 const BookingLog = require('../Models/BookingLog');
-mongoose.set('strictPopulate', false);
+const sendSms = require('../Utils/SendSms');
+const formatPhoneNumber = require('../Utils/FormatPhoneNumber');
 
 
+// Create a new booking
 exports.createBooking = async (req, res) => {
   try {
     const { carId, customerName, customerPhone, startDate, endDate } = req.body;
@@ -31,21 +33,19 @@ exports.createBooking = async (req, res) => {
 
     await booking.save();
 
-// After creating booking
-await new BookingLog({
-  bookingId: booking._id,
-  action: 'Created',
-  status: booking.status
-}).save();
+    // After creating booking
+    await new BookingLog({
+      bookingId: booking._id,
+      action: 'Created',
+      status: booking.status
+    }).save();
 
     res.status(201).json(booking);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
-
-
-
+// Get all bookings
 exports.getAllBookings = async (req, res) => {
   try {
     const bookings = await Booking.find()
@@ -56,7 +56,7 @@ exports.getAllBookings = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
+// Get booking by ID
 exports.getBookingById = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id).populate('carId');
@@ -66,28 +66,38 @@ exports.getBookingById = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
+// Update booking and status and sms to customer  
 exports.updateBookingStatus = async (req, res) => {
   try {
     const { status } = req.body;
+
     const booking = await Booking.findByIdAndUpdate(
       req.params.id,
       { status },
       { new: true }
     );
+
+    if (!booking) return res.status(404).json({ error: 'Booking not found' });
+
+    // Save booking log
     await new BookingLog({
       bookingId: booking._id,
       action: 'Status Updated',
       status
     }).save();
-    if (!booking) return res.status(404).json({ error: 'Booking not found' });
+
+    // Format phone and send SMS
+    const formattedPhone = formatPhoneNumber(booking.customerPhone);
+    const message = `Hi ${booking.customerName}, your booking status is now: ${status}. Thank you for using our service.`;
+    
+    await sendSms(formattedPhone, message);
+
     res.json(booking);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-
 };
-
+// Delete booking
 exports.deleteBooking = async (req, res) => {
   try {
     const booking = await Booking.findByIdAndDelete(req.params.id);
@@ -97,6 +107,7 @@ exports.deleteBooking = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+// Get bookings by customer using phoneNumber
 exports.getBookingsByCustomer = async (req, res) => {
   try {
     const { phone } = req.query;
