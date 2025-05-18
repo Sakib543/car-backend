@@ -9,7 +9,7 @@ const formatPhoneNumber = require('../Utils/FormatPhoneNumber');
 // Create a new booking
 exports.createBooking = async (req, res) => {
   try {
-    const { carId, customerName, customerPhone, startDate, endDate } = req.body;
+    const { carId, customerName, customerEmail, customerPhone, cnic, startDate, endDate } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(carId)) {
       return res.status(400).json({ error: 'Invalid carId' });
@@ -25,7 +25,9 @@ exports.createBooking = async (req, res) => {
     const booking = new Booking({
       carId,
       customerName,
+      customerEmail,
       customerPhone,
+      cnic,
       startDate,
       endDate,
       totalPrice,
