@@ -89,14 +89,18 @@ exports.updateBookingStatus = async (req, res) => {
     }).save();
 
     // Format phone and send SMS
-    const formattedPhone = formatPhoneNumber(booking.customerPhone);
-    const message = `Hi ${booking.customerName}, your booking status is now: ${status}. Thank you for using our service.`;
-    
-    await sendSms(formattedPhone, message);
+   try {
+  const formattedPhone = formatPhoneNumber(booking.customerPhone);
+  const message = `Hi ${booking.customerName}, your booking status is now: ${status}. Thank you for using our service.`;
+  console.log("Formatted Phone:", formattedPhone); // Debug log
+  await sendSms(formattedPhone, message);
+} catch (smsError) {
+  console.error("SMS sending failed:", smsError.message);
+}
 
     res.json(booking);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message});
   }
 };
 // Delete booking
