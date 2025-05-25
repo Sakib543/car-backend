@@ -2,8 +2,7 @@ const Booking = require('../Models/Bookingmodel');
 const Car = require('../Models/Carmodel');
 const mongoose = require('mongoose');
 const BookingLog = require('../Models/BookingLog');
-const sendSms = require('../Utils/SendSms');
-const formatPhoneNumber = require('../Utils/FormatPhoneNumber');
+const sendEmail = require('../Utils/sendEmail');
 
 
 // Create a new booking
@@ -75,24 +74,26 @@ exports.updateBookingStatus = async (req, res) => {
 
     const booking = await Booking.findByIdAndUpdate(
       req.params.id,
+      req.body,
       { status },
       { new: true }
     );
 
     if (!booking) return res.status(404).json({ error: 'Booking not found' });
-
-    // Save booking log
     await new BookingLog({
       bookingId: booking._id,
       action: 'Status Updated',
       status
     }).save();
 
-    // Format phone and send SMS
-    const formattedPhone = formatPhoneNumber(booking.customerPhone);
-    const message = `Hi ${booking.customerName}, your booking status is now: ${status}. Thank you for using our service.`;
-    
-    await sendSms(formattedPhone, message);
+    // Send email to customer
+    const subject = `Booking Status Update - ${status}`;
+    const message = `Hi ${booking.customerName},\n\nYour booking status has been updated to: ${status}.\n\nThank you for using our service.`;
+
+    // You must ensure `booking.customerEmail` exists in your Booking model or populate from user
+    if (booking.customerEmail) {
+      await sendEmail(booking.customerEmail, subject, message);
+    }
 
     res.json(booking);
   } catch (err) {
