@@ -38,7 +38,7 @@ exports.createuser = async (req, res) =>
 
             //verification link
             // const link = `https://car-backend-production.up.railway.app/api/customer/Verify-email?token=${token}`;
-            const link = `http://localhost:5000/api/user/Verify-email?token=${token}`;
+            const link = `https://car-backend-production.up.railway.app/api/user/Verify-email?token=${token}`;
 
             await transporter.sendMail({
                 from: `"Verify Email" <${process.env.Email}>`,
