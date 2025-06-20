@@ -10,5 +10,6 @@ router.get('/verify-email', usercontrol.verifyemail);
 router.get('/:id', usercontrol.getuserbyid);
 router.put('/update/:Id', Authentication, usercontrol.updatuser);
 router.delete('/:id', Authentication, usercontrol.userdelete);
+router.get('/all', Authentication, usercontrol.getAllUsers);
 
 module.exports = router;
