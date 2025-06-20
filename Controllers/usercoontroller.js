@@ -81,7 +81,7 @@ exports.getuserbyid = async (req, res) => {
 
 exports.updatuser = async (req, res) => {
     try {
-        const allowedFields = ['username', 'isActive',];
+        const allowedFields = ['username', 'isActive'];
         const updates = {};
 
         // Build update object from allowed fields
@@ -91,10 +91,14 @@ exports.updatuser = async (req, res) => {
             }
         }
 
-        // Normalize role casing (optional)
-        // if (updates.role) {
-        //     updates.role = updates.role.charAt(0).toUpperCase() + updates.role.slice(1).toLowerCase();
-        // }
+        // Handle password update if provided
+        if (req.body.password) {
+            if (req.body.password !== req.body.confirmpassword) {
+                return res.status(400).send('Passwords do not match.');
+            }
+            const hashed = await bycrypt.hash(req.body.password, 10);
+            updates.password = hashed;
+        }
 
         // Perform update
         const updateduser = await newuser.findByIdAndUpdate(
