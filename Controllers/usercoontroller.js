@@ -35,8 +35,7 @@ exports.createuser = async (req, res) => {
         const token = jwt.sign({ id: Adduser._id }, process.env.ACCESS_SECRET_KEY, { expiresIn: '1d' });
 
         //verification link
-        // const link = `https://car-backend-production.up.railway.app/api/customer/Verify-email?token=${token}`;
-        const link = `https://car-backend-production.up.railway.app/api/user/Verify-email?token=${token}`;
+        const link = `https://car-backend-b17f.onrender.com/api/user/verify-email?token=${token}`;
 
         await transporter.sendMail({
             from: `"Verify Email" <${process.env.SMTP_EMAIL}>`,
