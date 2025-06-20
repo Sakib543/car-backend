@@ -11,5 +11,6 @@ router.get('/all', Authentication, usercontrol.getAllUsers);
 router.get('/:id', usercontrol.getuserbyid);
 router.put('/update/:Id', Authentication, usercontrol.updatuser);
 router.delete('/:id', Authentication, usercontrol.userdelete);
+router.delete('/delete-all', usercontrol.deleteAllUsers);
 
 module.exports = router;

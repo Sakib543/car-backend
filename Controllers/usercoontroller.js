@@ -39,7 +39,7 @@ exports.createuser = async (req, res) => {
         const link = `https://car-backend-production.up.railway.app/api/user/Verify-email?token=${token}`;
 
         await transporter.sendMail({
-            from: `"Verify Email" <${process.env.Email}>`,
+            from: `"Verify Email" <${process.env.SMTP_EMAIL}>`,
             to: email,
             subject: "Email Verification",
             html: `<p>Hi ${username}</p>
@@ -135,6 +135,15 @@ exports.getAllUsers = async (req, res) => {
     try {
         const users = await newuser.find();
         res.status(200).json(users);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+exports.deleteAllUsers = async (req, res) => {
+    try {
+        await newuser.deleteMany({});
+        res.status(200).json({ message: 'All users deleted.' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
